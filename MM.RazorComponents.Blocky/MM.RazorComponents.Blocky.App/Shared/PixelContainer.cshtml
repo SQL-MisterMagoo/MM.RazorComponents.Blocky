@@ -1,0 +1,41 @@
+﻿<div onwheel=@OnWheel style="position:relative;padding:0;margin:0;display:grid;grid-gap:0px;grid-template-columns:repeat(@Width,@(PixelSize)px);grid-template-rows:repeat(@Height,@(PixelSize)px);grid-auto-flow:row;">
+    @foreach (var item in Items)
+    {
+        <Pixel Color=@item Size=@PixelSize Selected=@SelectedColor Clickable="true" />
+    }
+</div>
+<div style='display:flex;justify-content:center;max-height:30px;width:@(Width*PixelSize)px;overflow:hidden;margin:0.5em 0 0.2em 0;'>
+    <Pixel Color=@Color Size=@((int)(Width*PixelSize)) />
+</div>
+<div style='display:flex;flex-direction:row;justify-content:space-around;width:@(Width*PixelSize)px;'>
+    <label>H:@Color.C1.ToString("N0")</label> <label>S:@Color.C2.ToString("N0")</label> <label>L:@Color.C3.ToString("N0")</label>
+</div>
+@functions
+{
+  Colors Color = new Colors(0, 0, 0, 0);
+  int Width => GridWidth > 0 ? GridWidth : (int)(Math.Sqrt(Items.Count()));
+  int Height => GridHeight > 0 ? GridHeight : (int)(Math.Sqrt(Items.Count()));
+  [Parameter] protected int GridWidth { get; set; }
+  [Parameter] protected int GridHeight { get; set; }
+  [Parameter] protected int PixelSize { get; set; }
+  [Parameter] protected IEnumerable<Colors> Items { get; set; }
+  [Parameter] protected Func<UIWheelEventArgs,Task> ChangeSaturation { get; set; }
+  [Parameter] protected bool Render { get; set; }
+
+  protected override bool ShouldRender()
+  {
+      return base.ShouldRender();
+  }
+  async Task SelectedColor(Colors color)
+  {
+      await Task.Delay(0);
+      Color = color;
+      StateHasChanged();
+  }
+
+  async Task OnWheel(UIWheelEventArgs args)
+  {
+    if (ChangeSaturation != null)
+      await ChangeSaturation?.Invoke(args) ;
+  }
+}

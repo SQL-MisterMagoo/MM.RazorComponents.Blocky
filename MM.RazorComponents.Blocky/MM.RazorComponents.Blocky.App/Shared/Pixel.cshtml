@@ -1,0 +1,24 @@
+﻿@if (Clickable)
+{
+<p onmousedown=@Select class="pixel" style="width:100%;height:100%;@PositionStyle background-color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);"/>
+}
+else
+{
+<p class="pixel2" style="@PositionStyle color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);"/>
+}
+@functions
+{
+  string border = "";
+  [Parameter] protected Colors Color { get ; set; }
+  [Parameter] protected Position Position { get; set; }
+  [Parameter] protected int Size { get; set; }
+  [Parameter] protected Func<Colors,Task> Selected { get; set; }
+  [Parameter] protected bool Clickable { get; set; }
+  [Parameter] protected bool Positionable { get; set; }
+
+  string PositionStyle => Positionable ? $"position:absolute;top:{Position.Y}px;left:{Position.X}px;width:{Size}px;height:{Size}px;" : "";
+  async Task Select(UIMouseEventArgs args)
+  {
+      await Selected?.Invoke(Color);
+  }
+}
