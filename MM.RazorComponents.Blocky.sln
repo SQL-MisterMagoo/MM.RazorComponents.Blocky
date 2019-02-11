@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.28531.58
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MM.RazorComponents.Blocky.Server", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\MM.RazorComponents.Blocky.Server.csproj", "{3DD8BCAF-DF41-43ED-ADF0-CF866E0EB7EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MM.RazorComponents.Blocky.App", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.App\MM.RazorComponents.Blocky.App.csproj", "{29DCCE18-EE5E-4F7A-B6DB-A4790F189633}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MM.RazorComponents.Blocky.App", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.App\MM.RazorComponents.Blocky.App.csproj", "{29DCCE18-EE5E-4F7A-B6DB-A4790F189633}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B0A3EBA1-29A7-4D19-9254-24AB6E33B681}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
