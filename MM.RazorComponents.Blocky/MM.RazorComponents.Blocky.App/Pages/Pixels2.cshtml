@@ -1,154 +1,98 @@
 ﻿@page "/pixels2"
-<div class="content" onmousemove="@PointerMove">
-<h3>Pixel Count @pixels?.Count</h3>
-<div class="input-group">
-    <label>Refresh</label><input class="input-control-sm" type="number" size="5" bind=@RefreshInterval autofocus="autofocus" />
-    <label>Pixel Interval</label><input type="number" size="5" bind=@PixelInterval />
-    <label>Spawn Interval</label><input type="number" size="5" bind=@SpawnInterval />
-    <label>Spawn Per Interval</label><input type="number" size="5" bind=@SpawnPerInterval />
-    <label>Max Pixels</label><input type="number" size="5" bind=@MaxPixelCount />
+@using SkiaSharp
+
+<div class="container-fluid mb-auto">
+    <div class="row">
+        <div class="col-12">
+            <h3>Pixel image</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            @if (Pixels is null)
+            {
+                <h4>Loading image...</h4>
+            }
+            else
+            {
+                foreach (var pixel in Pixels)
+                {
+                    <Pixel Color=pixel.Colors Position=pixel.Position Size=pixel.Size PositionVars="true" />
+                }
+            }
+        </div>
+    </div>
 </div>
-    @if (pixels != null)
-    {
-        foreach (var pixel in pixels)
-        {
-            <Pixel Color=pixel.Colors Position=pixel.Position Size=pixel.Size Positionable="true" />
-        }
-    }
-</div>
-@functions
-{
+@functions {
   // The list of active pixels
-  List<PixelDTO> pixels;
-  // Task that controls refreshing the page
-  Task draw;
-  // Task that controls spawning new pixels
-  Task spawn;
-  // Random number source for variations in initial velocity
-  Random random;
+  System.Collections.Concurrent.ConcurrentBag<PixelDTO> Pixels;
 
-  // Pixel spawn point
-  double EX, EY;
-  // Screen limits - should be read at runtime, but this is just a demo
-  const int SCREEN_WIDTH = 1900;
-  const int SCREEN_HEIGHT = 700;
+  private const double MAXDIM = 80;
+  public int PixelSize = 5;
+  public int PictureWidth = 0;
+  public int PictureHeight = 0;
+  Task Loader;
 
-  // Time (ms) between StateHasChanged : lower = more FPS, higher = fewer FPS
-  int RefreshInterval = 5;
-  // Time (ms) between new Pixel spawning : lower = more pixels, higher = fewer pixels
-  int SpawnInterval = 5;
-  // Time (ms) between Pixel movements : lower = faster pixels, higher = slower pixels
-  int PixelInterval = 5;
-  // Number of pixels spawned per interval : lower = fewer pixels, higher = more pixels
-  int SpawnPerInterval = 2;
-  // Maximum number of pixels allowed
-  int MaxPixelCount = 500;
-  // Initial pixel size
-  const double INITIAL_PIXEL_SIZE = 5.0;
-  // Alter pixel size per frame : lower than 1 = reduce in size, higher than 1 = increase in size
-  const double SCALE_FACTOR = 1.005;
-  // Alter X-axis movement delta per frame : deltaX *= DELTA_X_FACTOR
-  const double DELTA_X_FACTOR = 1;
-  // Alter Y-axis movement delta per frame : deltaY += DELTA_Y_FACTOR
-  const double DELTA_Y_FACTOR = 0.05;
-  double Hue = 5.0;
-
-  protected override void OnInit()
+  protected override async Task OnInitAsync()
   {
-      base.OnInit();
-      EX = 500;
-      EY = 200;
-      pixels = new List<PixelDTO>();
-      random = new Random();
-      draw = Draw();
-      spawn = Spawn();
+      Loader = LoadImage();
+      await Invoke(StateHasChanged);
   }
 
-  void PointerMove(UIMouseEventArgs args)
+  async Task LoadImage()
   {
-      EX = args.ClientX + 10;
-      EY = args.ClientY + 10;
-  }
-
-  async Task Draw()
-  {
-      while (true) // Only because this is a demo!
+      await Task.Delay(1);
+      var filepath = @"C:\Users\miste\source\repos\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\wwwroot\images\dotnetbot.jpg";
+      var bytes = await Task.FromResult(System.IO.File.ReadAllBytes(filepath));
+      using (var stream = new SKMemoryStream(bytes))
       {
-          await Task.Delay(RefreshInterval);
-          StateHasChanged();
-      }
-  }
-
-  async Task Spawn()
-  {
-      int pixelCount = 0;
-      while (true) // Only because this is a demo!
-      {
-          await Task.Delay(SpawnInterval);
+          using (SKBitmap imageInitial = SKBitmap.Decode(stream))
           {
-              // Cycle the colours
-              if (pixelCount < MaxPixelCount)
+              Pixels = new System.Collections.Concurrent.ConcurrentBag<PixelDTO>();
+              int newSize = (int)MAXDIM;
+              SKBitmap image;
+              if (imageInitial.Width > newSize || imageInitial.Height > newSize)
               {
-                  Hue += SpawnPerInterval;
-                  Hue = Hue > 250 ? 5 : Hue;
-                  for (int i = 0; i < SpawnPerInterval; i++)
+                  var newWidth = imageInitial.Width;
+                  var newHeight = imageInitial.Height;
+                  double scale = 1;
+                  if (newWidth > newHeight)
                   {
-                      SpawnPixel(Hue);
-                      pixelCount++;
+                      scale = (newSize / (double)newWidth);
                   }
+                  else
+                  {
+                      scale = (newSize / (double)newHeight);
+                  }
+                  var newInfo = imageInitial.Info.WithSize((int)(newWidth * scale), (int)(newHeight * scale));
+                  image = imageInitial.Resize(newInfo, SKFilterQuality.High);
               }
-              else if (pixelCount > MaxPixelCount)
+              else
               {
-                  pixelCount = MaxPixelCount;
-                  TrimPixels();
+                  image = imageInitial;
               }
+
+              Parallel.For(0, image.Height - 1, y =>
+              {
+                  Parallel.For(0, image.Width - 1, x =>
+                  {
+                      SKColor sKColor = image.GetPixel(x, y);
+                      sKColor.ToHsl(out float h, out float s, out float l);
+                      if (l < 100)
+                      {
+                          var pixel = new PixelDTO()
+                          {
+                              Colors = new Colors(h, s, l, sKColor.Alpha),
+                              Position = new Position(x * PixelSize, y * PixelSize),
+                              Scale = PixelSize
+                          };
+                          Pixels.Add(pixel);
+                      }
+                  });
+              });
           }
       }
+      await Invoke(StateHasChanged);
   }
 
-  Task TrimPixels()
-  {
-      pixels.Skip(MaxPixelCount).ToList().ForEach(p => p.Die());
-      return Task.CompletedTask;
-  }
-
-  async Task SpawnPixel(double Hue)
-  {
-      // Pixel Color/Position/Scale
-      PixelDTO pixel = new PixelDTO()
-      {
-          Colors = new Colors(Hue, 90, 70, 1),
-          Position = new Position(EX, EY),
-          Scale = INITIAL_PIXEL_SIZE
-      };
-
-      // Add the new pixel to the list, so it gets drawn
-      pixels.Add(pixel);
-
-      // Pixel handles it's own motion
-      while (!pixel.ShouldDie) // again - only because it's a demo
-      {
-          // Initial velocity deltas for the pixel
-          double deltaX = random.NextDouble() * 2 - 1.2;
-          double deltaY = 0 - random.NextDouble() * 1;
-          pixel.Position = new Position(EX + deltaX, EY + deltaY);
-          pixel.Scale = INITIAL_PIXEL_SIZE;
-          pixel.Colors.A = 1;
-          pixel.Colors.C1 = Hue;
-          while (pixel.Position.X > 0 && pixel.Position.X < SCREEN_WIDTH && pixel.Position.Y < SCREEN_HEIGHT)
-          {
-              // Very crude timing - if this was to be accurate we would need a frame time delta to scale movements
-              await Task.Delay(PixelInterval);
-              pixel.Position.X += deltaX;
-              pixel.Position.Y += deltaY;
-              pixel.Scale *= SCALE_FACTOR;
-              deltaX *= DELTA_X_FACTOR;
-              deltaY += DELTA_Y_FACTOR;
-              pixel.Colors.A *= 0.99;
-          }
-      };
-      pixels.Remove(pixel);
-
-  }
-  //
 }

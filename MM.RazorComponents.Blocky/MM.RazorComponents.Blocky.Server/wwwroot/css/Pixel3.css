@@ -1,0 +1,23 @@
+﻿.pixel3 {
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    background-color: currentColor;
+    left: 0px;
+    top: 0px;
+    --pos-speed: 5000ms;
+    animation: falling var(--pos-speed,1s) ease-out 1s forwards,
+        reveal 1s ease-out;
+}
+
+@keyframes falling {
+    100% {
+        left: var(--pos-left,attr(left));
+        top: var(--pos-top,attr(top));
+    }
+}
+
+@keyframes reveal {
+    0% { opacity:0;}
+    100% { opacity:1;}
+}

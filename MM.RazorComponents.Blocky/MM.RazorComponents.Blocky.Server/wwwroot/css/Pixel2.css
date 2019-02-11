@@ -5,8 +5,3 @@
     background-color: currentColor;
 }
 
-/*.pixel2::after {
-    content: '*';
-    font-size: calc(attr(height)px);
-}*/
-
