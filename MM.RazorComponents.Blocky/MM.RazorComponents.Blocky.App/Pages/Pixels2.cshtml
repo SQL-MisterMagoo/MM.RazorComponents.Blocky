@@ -3,7 +3,7 @@
     <div class="row">
         <div class="col-12">
             <h3>Pixel Count @pixelCount</h3>
-            <p>Hold ALT and move mouse to change position.</p>
+            <p>Hold ALT and move mouse to change position. This requires <i>one</i> javascript call to get the offset.</p>
         </div>
     </div>
     <div class="row">
@@ -79,8 +79,8 @@
     protected override void OnInit()
     {
         base.OnInit();
-        EX = 500;
-        EY = 200;
+        EX = 300;
+        EY = 0;
         pixels = new List<PixelDTO>();
         random = new Random();
         draw = Draw();

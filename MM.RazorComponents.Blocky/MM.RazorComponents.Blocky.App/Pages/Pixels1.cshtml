@@ -9,5 +9,13 @@
             <input style="grid-area: 2/2/2/3;" type="range" max="100" min="1" bind="@PixelSize" />
         </div>
     </div>
-    <PixelContainer Items=@Pixels PixelSize=@PixelSize GridWidth=@PictureWidth GridHeight=@PictureHeight  />
+    @if (IsLoading)
+    {
+        <h4>Image uploading...</h4>
+        <progress max="@MAXDIM" value="@Progress"></progress>
+    }
+    else
+    {
+        <PixelContainer Items=@Pixels PixelSize=@PixelSize GridWidth=@PictureWidth GridHeight=@PictureHeight />
+    }
 </div>

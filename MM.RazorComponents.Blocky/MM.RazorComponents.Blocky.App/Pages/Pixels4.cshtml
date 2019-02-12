@@ -4,7 +4,7 @@
 <div class="container-fluid mb-auto">
     <div class="row">
         <div class="col-12">
-            <h3>Pixel image</h3>
+            <h3>Pixel image @(Pixels?.Count.ToString("0,000 Pixels"))</h3>
             <input type="file" onchange="var reader = new FileReader(); reader.addEventListener('load', function () { var el = document.querySelector('#filedata'); el.value = this.result; el.dispatchEvent(new Event('change')); }, false); reader.readAsDataURL(this.files[0]);" />
             <input type="text" id="filedata" hidden="hidden" bind="@files" />
         </div>
@@ -13,7 +13,9 @@
         <div class="col-12">
             @if (FileData is null)
             {
-                <h4>Upload an image...keep it small (&lt;30KB) for now or SignalR will break</h4>
+                <h4>Upload an image...keep it small (&lt;25KB) for now or SignalR will break</h4>
+                <p>This page uses a small piece of javascript to transfer the file upload to the server.</p>
+                <p>Everything else is either C# or CSS.</p>
             }
             else if (IsLoading)
             {
@@ -53,8 +55,8 @@
   // The list of active pixels
   System.Collections.Concurrent.ConcurrentBag<PixelDTO> Pixels;
 
-  double MAXDIM = 100;
-  public int PixelSize = 3;
+  double MAXDIM = 150;
+  public int PixelSize = 4;
   public int PictureWidth = 0;
   public int PictureHeight = 0;
   Task Loader;
