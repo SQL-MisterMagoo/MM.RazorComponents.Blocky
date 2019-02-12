@@ -24,10 +24,10 @@ else
   [Parameter] protected bool Clickable { get; set; }
   [Parameter] protected bool Positionable { get; set; }
   [Parameter] protected bool PositionVars { get; set; }
-
+  
   Random random = new Random();
   string PositionStyle => Positionable ? $"position:absolute;top:{Position.Y}px;left:{Position.X}px;width:{Size}px;height:{Size}px;" : "";
-  string PositionVarsStyle => PositionVars ? $"position:absolute;--pos-top:{Position.Y}px;--pos-left:{Position.X}px;--pos-speed:{random.Next(1000,8000)}ms;top:{random.Next(0,500)}px;left:{random.Next(0,500)}px;width:{Size}px;height:{Size}px;" : "";
+  string PositionVarsStyle => PositionVars ? $"position:absolute;--pos-top:{Position.Y}px;--pos-left:{Position.X}px;--pos-speed:{random.Next(2000,3000)}ms;top:{random.Next(0,500)}px;left:{random.Next(0,500)}px;width:{Size}px;height:{Size}px;" : "";
 
   async Task Select(UIMouseEventArgs args)
   {

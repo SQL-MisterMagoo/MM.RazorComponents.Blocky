@@ -1,0 +1,131 @@
+﻿@page "/p4"
+@using SkiaSharp
+
+<div class="container-fluid mb-auto">
+    <div class="row">
+        <div class="col-12">
+            <h3>Pixel image</h3>
+            <input type="file" onchange="var reader = new FileReader(); reader.addEventListener('load', function () { var el = document.querySelector('#filedata'); el.value = this.result; el.dispatchEvent(new Event('change')); }, false); reader.readAsDataURL(this.files[0]);" />
+            <input type="text" id="filedata" hidden="hidden" bind="@files" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            @if (FileData is null)
+            {
+                <h4>Upload an image...keep it small (&lt;30KB) for now or SignalR will break</h4>
+            }
+            else if (IsLoading)
+            {
+                <h4>Image uploading...</h4>
+                <progress max="@MAXDIM" value="@Progress"></progress>
+            }
+            else
+            {
+                foreach (var pixel in Pixels)
+                {
+                    <Pixel2 Color=pixel.Colors Position=pixel.Position Size=pixel.Size/>
+                }
+            }
+        </div>
+    </div>
+</div>
+@functions {
+  bool IsLoading;
+  int Progress;
+  byte[] FileData;
+  string files
+  {
+      get => ""; set
+      {
+          try
+          {
+              if (value.Contains(";base64,"))
+              {
+                  FileData = Convert.FromBase64String(value.Substring(value.IndexOf("base64") + 7));
+              }
+          }
+          catch { }
+          Loader = LoadImage();
+      }
+  }
+
+  // The list of active pixels
+  System.Collections.Concurrent.ConcurrentBag<PixelDTO> Pixels;
+
+  double MAXDIM = 100;
+  public int PixelSize = 3;
+  public int PictureWidth = 0;
+  public int PictureHeight = 0;
+  Task Loader;
+
+  protected override async Task OnInitAsync()
+  {
+      Loader = LoadImage();
+      await Invoke(StateHasChanged);
+  }
+
+  async Task LoadImage()
+  {
+      IsLoading = true;
+      Progress = 0;
+      await Task.Delay(1);
+      var bytes = FileData;
+      using (var stream = new SKMemoryStream(bytes))
+      {
+          using (SKBitmap imageInitial = SKBitmap.Decode(stream))
+          {
+              Pixels = new System.Collections.Concurrent.ConcurrentBag<PixelDTO>();
+              await Invoke(StateHasChanged);
+              await Task.Delay(1);
+              int newSize = (int)MAXDIM;
+              SKBitmap image;
+              if (imageInitial.Width > newSize || imageInitial.Height > newSize)
+              {
+                  var newWidth = imageInitial.Width;
+                  var newHeight = imageInitial.Height;
+                  double scale = 1;
+                  if (newWidth > newHeight)
+                  {
+                      scale = (newSize / (double)newWidth);
+                  }
+                  else
+                  {
+                      scale = (newSize / (double)newHeight);
+                  }
+                  var newInfo = imageInitial.Info.WithSize((int)(newWidth * scale), (int)(newHeight * scale));
+                  image = imageInitial.Resize(newInfo, SKFilterQuality.High);
+              }
+              else
+              {
+                  image = imageInitial;
+              }
+
+              for(int y=0;y< image.Height; y++)
+              {
+                  Parallel.For(0, image.Width - 1, x =>
+                  {
+                      SKColor sKColor = image.GetPixel(x, y);
+                      sKColor.ToHsl(out float h, out float s, out float l);
+                      if (l < 100)
+                      {
+                          var pixel = new PixelDTO()
+                          {
+                              Colors = new Colors(h, s, l, sKColor.Alpha),
+                              Position = new Position(x * PixelSize, y * PixelSize),
+                              Scale = PixelSize
+                          };
+                          Pixels.Add(pixel);
+                      }
+                  });
+                  Progress++;
+                  await Invoke(StateHasChanged);
+                  await Task.Delay(1);
+              };
+          }
+      }
+      IsLoading = false;
+      await Invoke(StateHasChanged);
+  }
+
+}

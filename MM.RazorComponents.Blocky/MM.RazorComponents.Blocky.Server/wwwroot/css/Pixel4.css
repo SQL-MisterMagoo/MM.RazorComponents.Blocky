@@ -1,7 +1,7 @@
-﻿.pixel3 {
+﻿.pixel4 {
     margin: 0;
     padding: 0;
-    border-radius: 50%;
+    /*border-radius: 50%;*/
     background-color: currentColor;
     left: 0px;
     top: 0px;
@@ -12,8 +12,7 @@
 
 @keyframes falling {
     100% {
-        left: var(--pos-left,attr(left));
-        top: var(--pos-top,attr(top));
+        transform: translate(var(--pos-left),var(--pos-top));
     }
 }
 
