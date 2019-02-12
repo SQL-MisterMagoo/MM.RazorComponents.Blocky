@@ -12,7 +12,7 @@
             {
                 foreach (var pixel in pixels)
                 {
-                    <Pixel3 Color=pixel.Colors Position=pixel.Position Size=pixel.Size />
+                    <AbsolutePixel Color=pixel.Colors Position=pixel.Position Size=pixel.Size />
                 }
             }
         </div>
@@ -74,6 +74,7 @@
     double DeltaYFactor = 0.05;
     double Hue = 5.0;
     int pixelCount = 0;
+    int[] offset;
 
     protected override void OnInit()
     {
@@ -90,7 +91,10 @@
     {
         if (args.AltKey)
         {
-            var offset = await jSRuntime.InvokeAsync<int[]>("pixel.getOffset", divRef);
+            if (offset is null)
+            {
+                offset = await jSRuntime.InvokeAsync<int[]>("pixel.getOffset", divRef);
+            }
             int x = offset[0];
             int y = offset[1];
             EX = args.ClientX - x;

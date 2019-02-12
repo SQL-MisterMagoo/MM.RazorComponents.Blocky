@@ -7,6 +7,7 @@ using SkiaSharp;
 
 namespace MM.RazorComponents.Blocky.App
 {
+	
 	public class SkiaPictureBase : ComponentBase
 	{
 		private const double MAXDIM = 200;
@@ -22,9 +23,8 @@ namespace MM.RazorComponents.Blocky.App
 		async Task LoadImage()
 		{
 			await Task.Delay(0);
-			//var filepath = @"C:\Users\miste\source\repos\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\wwwroot\images\blazor-cutout.png";
-			//var filepath = @"C:\Users\miste\source\repos\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\wwwroot\images\casio060407 009.jpg";
-			var filepath = @"C:\Users\miste\source\repos\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\wwwroot\images\dotnetbot.jpg";
+			
+			var filepath = @"wwwroot\images\dotnetbot.jpg";
 			var bytes = await Task.FromResult(System.IO.File.ReadAllBytes(filepath));
 			Console.WriteLine($"Got some bytes: {bytes.Length} {bytes.ToString()}");
 			using (var stream = new SKMemoryStream(bytes))

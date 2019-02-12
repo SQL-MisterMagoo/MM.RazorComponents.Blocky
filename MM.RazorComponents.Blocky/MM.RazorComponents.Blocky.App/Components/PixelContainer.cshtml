@@ -1,7 +1,7 @@
 ﻿<div onwheel=@OnWheel style="position:relative;padding:0;margin:0;display:grid;grid-gap:0px;grid-template-columns:repeat(@Width,@(PixelSize)px);grid-template-rows:repeat(@Height,@(PixelSize)px);grid-auto-flow:row;">
     @foreach (var item in Items)
     {
-        <Pixel Color=@item Size=@PixelSize Selected=@SelectedColor Clickable="true" />
+        <GridPixel Color=@item Size=@PixelSize Selected=@SelectedColor Clickable="true" />
     }
 </div>
 <div style='display:flex;justify-content:center;max-height:30px;width:@(Width*PixelSize)px;overflow:hidden;margin:0.5em 0 0.2em 0;'>
