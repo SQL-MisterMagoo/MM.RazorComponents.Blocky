@@ -1,36 +1,25 @@
 ﻿@if (Clickable)
 {
-    <p onmousedown=@Select class="pixel" style="width:100%;height:100%;@PositionStyle background-color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);" />
-}
-else if (Positionable)
-{
-    <p class="pixel2" style="@PositionStyle color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);" />
-}
-else if (PositionVars)
-{
-    <p class="pixel3" style="@PositionVarsStyle color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);" />
+    <p onmousedown=@Select class="@ClassName @SubClassName"
+       style="@ColorStyle" />
 }
 else
 {
-    <p class="pixel" style="width:100%;height:100%;@PositionStyle background-color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);" />
+    <p class="@ClassName @SubClassName"
+       style="@ColorStyle" />
 }
 @functions
 {
-  string border = "";
-  [Parameter] protected Colors Color { get; set; }
-  [Parameter] protected Position Position { get; set; }
-  [Parameter] protected int Size { get; set; }
-  [Parameter] protected Func<Colors, Task> Selected { get; set; }
-  [Parameter] protected bool Clickable { get; set; }
-  [Parameter] protected bool Positionable { get; set; }
-  [Parameter] protected bool PositionVars { get; set; }
-  
-  Random random = new Random();
-  string PositionStyle => Positionable ? $"position:absolute;top:{Position.Y}px;left:{Position.X}px;width:{Size}px;height:{Size}px;" : "";
-  string PositionVarsStyle => PositionVars ? $"position:absolute;--pos-top:{Position.Y}px;--pos-left:{Position.X}px;--pos-speed:{random.Next(2000,3000)}ms;top:{random.Next(0,500)}px;left:{random.Next(0,500)}px;width:{Size}px;height:{Size}px;" : "";
+    [Parameter] protected Colors Color { get; set; }
+    [Parameter] protected Func<Colors, Task> Selected { get; set; }
+    [Parameter] protected bool Clickable { get; set; }
+    [Parameter] protected string ClassName { get; set; } = "pixel";
+    [Parameter] protected string SubClassName { get; set; } = "px-grid";
 
-  async Task Select(UIMouseEventArgs args)
-  {
-      await Selected?.Invoke(Color);
-  }
+    string ColorStyle => $"--pc:hsla({Color.C1.ToString("F2")},{Color.C2.ToString("F2")}%,{Color.C3.ToString("F2")}%,{Color.A.ToString("F2")});";
+
+    async Task Select(UIMouseEventArgs args)
+    {
+        await Selected?.Invoke(Color);
+    }
 }

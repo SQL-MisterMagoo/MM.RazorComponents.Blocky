@@ -11,7 +11,7 @@
     </div>
     <div class="row">
         <div class="col-12">
-            @if (FileData is null)
+            @if (Pixels is null)
             {
                 <h4>Upload an image...keep it small (&lt;25KB) for now or SignalR will break</h4>
                 <p>This page uses a small piece of javascript to transfer the file upload to the server.</p>
@@ -20,13 +20,13 @@
             else if (IsLoading)
             {
                 <h4>Image uploading...</h4>
-                <progress max="@MAXDIM" value="@Progress"></progress>
+                <progress max="@PictureHeight" value="@Progress"></progress>
             }
             else
             {
                 foreach (var pixel in Pixels)
                 {
-                    <KeyframePixel Color=pixel.Colors Position=pixel.Position Size=pixel.Size/>
+                    <KeyframePixel Color=pixel.Colors Position=pixel.Position Size=pixel.Size SpeedRange=@SpeedRange />
                 }
             }
         </div>
@@ -34,6 +34,7 @@
 </div>
 @functions {
   bool IsLoading;
+  bool IsRendering;
   int Progress;
   byte[] FileData;
   string files
@@ -42,7 +43,7 @@
       {
           try
           {
-              if (value.Contains(";base64,"))
+              if (value.Contains(";base64,") && FileData is null)
               {
                   FileData = Convert.FromBase64String(value.Substring(value.IndexOf("base64") + 7));
               }
@@ -55,17 +56,12 @@
   // The list of active pixels
   System.Collections.Concurrent.ConcurrentBag<PixelDTO> Pixels;
 
-  double MAXDIM = 150;
+  double MAXDIM = 100;
   public int PixelSize = 4;
   public int PictureWidth = 0;
   public int PictureHeight = 0;
+  public Vector2D SpeedRange = new Vector2D(2000, 3000);
   Task Loader;
-
-  protected override async Task OnInitAsync()
-  {
-      Loader = LoadImage();
-      await Invoke(StateHasChanged);
-  }
 
   async Task LoadImage()
   {
@@ -103,7 +99,12 @@
                   image = imageInitial;
               }
 
-              for(int y=0;y< image.Height; y++)
+              PictureHeight = image.Height;
+              PictureWidth = image.Width;
+              System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+              stopWatch.Start();
+              Console.WriteLine($"Starting pixel generation");
+              for (int y = 0; y < image.Height; y++)
               {
                   Parallel.For(0, image.Width - 1, x =>
                   {
@@ -114,7 +115,7 @@
                           var pixel = new PixelDTO()
                           {
                               Colors = new Colors(h, s, l, sKColor.Alpha),
-                              Position = new Position(x * PixelSize, y * PixelSize),
+                              Position = new Vector2D(x * PixelSize, y * PixelSize),
                               Scale = PixelSize
                           };
                           Pixels.Add(pixel);
@@ -124,10 +125,15 @@
                   await Invoke(StateHasChanged);
                   await Task.Delay(1);
               };
+              stopWatch.Stop();
+              Console.WriteLine($"Finished pixel generation {stopWatch.Elapsed}");
           }
       }
+      IsRendering = false;
+      FileData = null;
       IsLoading = false;
       await Invoke(StateHasChanged);
+      await Task.Delay(0);
   }
 
 }

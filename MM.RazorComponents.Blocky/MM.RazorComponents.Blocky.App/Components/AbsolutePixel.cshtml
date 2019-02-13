@@ -1,12 +1,14 @@
-﻿<p class="@ClassName" style="@PositionVarsStyle color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);" />
+﻿<p class="@ClassName @SubClassName"
+   style="@FinalPositionStyle @SizingStyle @ColorStyle" />
 @functions
 {
   [Parameter] protected Colors Color { get; set; }
-  [Parameter] protected Position Position { get; set; }
+  [Parameter] protected Vector2D Position { get; set; }
   [Parameter] protected int Size { get; set; }
-  [Parameter] protected string ClassName { get; set; } = "pixel2";
+  [Parameter] protected string ClassName { get; set; } = "pixel";
+  [Parameter] protected string SubClassName { get; set; } = "px-abs";
 
-  Random random = new Random();
-  string PositionVarsStyle => $"position:absolute;transform:translate({Position.X}px,{Position.Y}px);width:{Size}px;height:{Size}px;";
-
-}  
+  string FinalPositionStyle => $"--pst:{Position.Y}px;--psl:{Position.X}px;";
+  string SizingStyle => $"--pw:{Size}px;--ph:{Size}px;";
+  string ColorStyle => $"--pc:hsla({Color.C1.ToString("F2")},{Color.C2.ToString("F2")}%,{Color.C3.ToString("F2")}%,{Color.A.ToString("F2")});";
+}    

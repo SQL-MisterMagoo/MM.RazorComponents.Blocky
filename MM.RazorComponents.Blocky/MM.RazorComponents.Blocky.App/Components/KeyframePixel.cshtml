@@ -1,12 +1,24 @@
-﻿<p class="@ClassName" style="@PositionVarsStyle color:hsla(@(Color.C1.ToString("F2")),@(Color.C2.ToString("F2"))%,@(Color.C3.ToString("F2"))%,@Color.A);" />
+﻿<p class=@classes style=@style />
 @functions
 {
-    [Parameter] protected Colors Color { get; set; }
-    [Parameter] protected Position Position { get; set; }
-    [Parameter] protected int Size { get; set; }
-    [Parameter] protected string ClassName { get; set; } = "pixel4";
+  [Parameter] protected Colors Color { get; set; }
+  [Parameter] protected Vector2D Position { get; set; }
+  [Parameter] protected int Size { get; set; }
+  [Parameter] protected string ClassName { get; set; } = "pixel";
+  [Parameter] protected string SubClassName { get; set; } = "px-abs px-g px-r";
+  [Parameter] protected Vector2D BoundingBox { get; set; } = new Vector2D(500, 300);
+  [Parameter] protected Vector2D SpeedRange { get; set; } = new Vector2D(2000, 5000);
 
-    Random random = new Random();
-    string PositionVarsStyle => $"position:absolute;--pos-top:{Position.Y}px;--pos-left:{Position.X}px;--pos-speed:{random.Next(2000, 3000)}ms;transform:translate({random.Next(0, 500)}px,{random.Next(0, 500)}px);width:{Size}px;height:{Size}px;";
+  Random random = new Random();
+  int StartLeft => random.Next(0, (int)BoundingBox.X);
+  int StartTop => random.Next(0, (int)BoundingBox.Y);
+  int Speed => random.Next((int)SpeedRange.X, (int)SpeedRange.Y);
 
+  string FinalPositionStyle => $"--pxtt:{Position.Y}px;--pxtl:{Position.X}px;";
+  string StartPositionStyle => $"--psl:{StartLeft}px;--pst:{StartTop}px;";
+  string SpeedStyle => $"--pxgs:{Speed}ms;";
+  string SizingStyle => $"--pw:{Size}px;--ph:{Size}px;";
+  string ColorStyle => $"--pc:hsla({Color.C1.ToString("F2")},{Color.C2.ToString("F2")}%,{Color.C3.ToString("F2")}%,{Color.A.ToString("F2")});";
+  string style => $"{FinalPositionStyle}{StartPositionStyle}{SizingStyle}{ColorStyle}{SpeedStyle}";
+  string classes => $"{ClassName} {SubClassName}";
 }  

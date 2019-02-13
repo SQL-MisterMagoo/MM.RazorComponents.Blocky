@@ -1,7 +1,57 @@
 ﻿.pixel {
+    --pw: 1px;
+    --ph: 1px;
+    --pc: black;
+    --pixel-gather-animation: "";
+    --pixel-reveal-animation: "";
+    --pixel-gather-delay: 0.7s;
+    --pxgs: 1000ms;
+    --pixel-reveal-delay: 0.7s;
+    --psl: 0px;
+    --pst: 0px;
+    --pxtl: 0px;
+    --pxtt: 0px;
     margin: 0;
     padding: 0;
     border-collapse: collapse;
-    border-radius:25%;
+    /*border-radius: 50%;*/
+    color: var( --pc);
+    background-color: currentColor;
+    transform: translate( var(--psl), var(--pst) );
+    width: var(--pw);
+    height: var(--ph);
+    animation: var(--pixel-gather-animation), var(--pixel-reveal-animation);
 }
 
+    .pixel.px-grid {
+        --pw:100%;
+        --ph:100%;
+    }
+
+    .pixel.px-abs {
+        position: absolute;
+    }
+
+    .pixel.px-g {
+        --pixel-gather-animation: gather var(--pxgs) ease-in-out var(--pixel-gather-delay) forwards;
+    }
+
+    .pixel.px-r {
+        --pixel-reveal-animation: reveal var(--pixel-reveal-delay) linear forwards;
+    }
+
+@keyframes gather {
+    100% {
+        transform: translate( var(--pxtl), var(--pxtt) );
+    }
+}
+
+@keyframes reveal {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
-using SkiaSharp;
 
 namespace MM.RazorComponents.Blocky.App
 {
 
-	public class SkiaPictureBase : ComponentBase
+	public class Pixels1Base : ComponentBase
 	{
-		public const double MAXDIM = 150;
+		public const double MAXDIM = 80;
 		public List<Colors> Pixels;
 		public int PixelSize = 1;
 		public int PictureWidth = 0;
@@ -18,6 +17,7 @@ namespace MM.RazorComponents.Blocky.App
 		public bool IsLoading = true;
 		public int Progress;
 		Task Loader;
+		
 		protected override void OnInit()
 		{
 			Loader = LoadImage();
@@ -58,6 +58,7 @@ namespace MM.RazorComponents.Blocky.App
 					}
 					PictureWidth = image.Width;
 					PictureHeight = image.Height;
+					Console.WriteLine($"Got some dimensions: {PictureWidth} x {PictureHeight}");
 
 					for (int y = 0; y < image.Height; y++)
 					{
@@ -71,10 +72,12 @@ namespace MM.RazorComponents.Blocky.App
 						await Invoke(StateHasChanged);
 						await Task.Delay(1);
 					}
+					Console.WriteLine($"Finished pixel processing: {Progress}");
 				}
 			}
 			IsLoading = false;
 			await Invoke(StateHasChanged);
+			await Task.Delay(0);
 		}
 	}
 }

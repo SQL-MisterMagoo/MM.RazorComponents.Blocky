@@ -19,12 +19,12 @@ namespace MM.RazorComponents.Blocky.App
 			A = a;
 		}
 	}
-	public struct Position
+	public struct Vector2D
 	{
 		public double X;
 		public double Y;
 
-		public Position(double X, double Y)
+		public Vector2D(double X, double Y)
 		{
 			this.X = X;
 			this.Y = Y;
@@ -34,7 +34,7 @@ namespace MM.RazorComponents.Blocky.App
 	public class PixelDTO
 	{
 		public Colors Colors;
-		public Position Position;
+		public Vector2D Position;
 		public double Scale;
 		public bool ShouldDie { get; private set; }
 		public int Size => (int)Scale;

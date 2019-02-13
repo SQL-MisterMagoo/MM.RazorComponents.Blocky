@@ -107,7 +107,7 @@
         while (true) // Only because this is a demo!
         {
             await Task.Delay(RefreshInterval);
-            await Invoke(StateHasChanged);
+            await Invoke(StateHasChanged).ConfigureAwait(false);
         }
     }
 
@@ -149,7 +149,7 @@
         PixelDTO pixel = new PixelDTO()
         {
             Colors = new Colors(Hue, 90, 70, 1),
-            Position = new Position(EX, EY),
+            Position = new Vector2D(EX, EY),
             Scale = InitialPixelSize
         };
 
@@ -162,7 +162,7 @@
             // Initial velocity deltas for the pixel
             double deltaX = random.NextDouble() * 2 - 1.2;
             double deltaY = 0 - random.NextDouble() * 1;
-            pixel.Position = new Position(EX + deltaX, EY + deltaY);
+            pixel.Position = new Vector2D(EX + deltaX, EY + deltaY);
             pixel.Scale = InitialPixelSize;
             pixel.Colors.A = 1;
             pixel.Colors.C1 = Hue;
