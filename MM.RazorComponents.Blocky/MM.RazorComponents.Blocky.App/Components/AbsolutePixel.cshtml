@@ -1,5 +1,4 @@
-﻿<p class="@ClassName @SubClassName"
-   style="@FinalPositionStyle @SizingStyle @ColorStyle" />
+﻿<p class=@classes style=@style />
 @functions
 {
   [Parameter] protected Colors Color { get; set; }
@@ -11,4 +10,6 @@
   string FinalPositionStyle => $"--pst:{Position.Y}px;--psl:{Position.X}px;";
   string SizingStyle => $"--pw:{Size}px;--ph:{Size}px;";
   string ColorStyle => $"--pc:hsla({Color.C1.ToString("F2")},{Color.C2.ToString("F2")}%,{Color.C3.ToString("F2")}%,{Color.A.ToString("F2")});";
+  string style => $"{FinalPositionStyle}{SizingStyle}{ColorStyle}";
+  string classes => $"{ClassName} {SubClassName}";
 }    

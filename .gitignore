@@ -259,3 +259,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/MM.RazorComponents.Blocky/MM.RazorComponents.Blocky.Server/Properties/PublishProfiles/BlockyPixels - Web Deploy.pubxml
