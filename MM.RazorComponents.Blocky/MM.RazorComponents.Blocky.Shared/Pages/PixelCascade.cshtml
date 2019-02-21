@@ -1,0 +1,187 @@
+﻿<div class="container-fluid mb-auto">
+    <div class="row">
+        <div class="col-12">
+            <h3>Pixel Count @pixelCount</h3>
+            <p>Hold ALT and move mouse to change position. This requires <i>one</i> javascript call to get the offset.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8" onmousemove=@MouseMove ref="@divRef">
+            @if (pixels != null)
+            {
+                foreach (var pixel in pixels)
+                {
+                    <AbsolutePixel Color=pixel.Colors Position=pixel.Position Size=pixel.Size />
+                }
+            }
+        </div>
+        <div class="form-group col-2">
+            <label>Refresh</label><input class="form-control" type="number" min="1" bind=@RefreshInterval autofocus="autofocus" title="Delay between refreshes (ms)" />
+            <label>Spawn Per Interval</label><input class="form-control" type="number" min="1" max="100" bind=@SpawnPerInterval title="How many pixels spawn each interval" />
+            <label>Max Pixels</label><input class="form-control" type="number" min="0" max="2000" step="50" bind=@MaxPixelCount title="Number of pixels to spawn" />
+            <label>Initial Pixel Size</label><input class="form-control" type="number" min="1" max="100" bind=@InitialPixelSize title="Pixel Start Size (px)" />
+        </div>
+        <div class="form-group col-2">
+            <label>Pixel Scale Factor</label><input class="form-control" type="number" min="1.00" max="1.03" step="0.01" bind=@PixelScaleFactor title="Growth factor for pixels" />
+            <label>Pixel Alpha Factor</label><input class="form-control" type="number" min="0.01" max="1.00" step="0.01" bind=@PixelAlphaFactor title="Alpha factor for pixels" />
+            <label>Delta X Factor</label><input class="form-control" type="number" min="0" max="2.00" step="0.01" bind=@DeltaXFactor title="Delta X factor for pixels" />
+            <label>Delta X Factor</label><input class="form-control" type="number" min="0" max="2.00" step="0.01" bind=@DeltaYFactor title="Delta Y factor for pixels" />
+        </div>
+    </div>
+</div>
+@functions
+{
+  [Inject] IJSRuntime jSRuntime { get; set; }
+  ElementRef divRef;
+
+  // The list of active pixels
+  List<PixelDTO> pixels;
+  // Task that controls refreshing the page
+  Task draw;
+  // Task that controls spawning new pixels
+  Task spawn;
+  // Random number source for variations in initial velocity
+  Random random;
+
+  // Pixel spawn point
+  double EX, EY;
+  // Screen limits - should be read at runtime, but this is just a demo
+  const int SCREEN_WIDTH = 1900;
+  const int SCREEN_HEIGHT = 700;
+
+  // Time (ms) between StateHasChanged : lower = more FPS, higher = fewer FPS
+  int RefreshInterval = 16;
+  // Number of pixels spawned per interval : lower = fewer pixels, higher = more pixels
+  int SpawnPerInterval = 2;
+  // Maximum number of pixels allowed
+  int MaxPixelCount = 100;
+  // Initial pixel size
+  double InitialPixelSize = 5.0;
+  // Alter pixel size per frame : lower than 1 = reduce in size, higher than 1 = increase in size
+  double PixelScaleFactor = 1.005;
+  // Alter pixel alpha per frame : lower than 1 = reduce alpha, higher than 1 = increase alpha
+  double PixelAlphaFactor = 0.99;
+  // Alter X-axis movement delta per frame : deltaX *= DeltaXFactor
+  double DeltaXFactor = 1.00;
+  // Alter Y-axis movement delta per frame : deltaY += DeltaYFactor
+  double DeltaYFactor = 0.05;
+  double Hue = 5.0;
+  int pixelCount = 0;
+  int[] offset;
+
+  protected override void OnInit()
+  {
+      base.OnInit();
+      EX = 300;
+      EY = 0;
+      pixels = new List<PixelDTO>();
+      random = new Random();
+      draw = Draw();
+  }
+
+  async Task MouseMove(UIMouseEventArgs args)
+  {
+      if (args.AltKey)
+      {
+          if (offset is null)
+          {
+              offset = await jSRuntime.InvokeAsync<int[]>("pixel.getOffset", divRef);
+          }
+          int x = offset[0];
+          int y = offset[1];
+          EX = args.ClientX - x;
+          EY = args.ClientY - y;
+      }
+  }
+
+  async Task Draw()
+  {
+      while (true) // Only because this is a demo!
+      {
+          await Task.Delay(RefreshInterval);
+          if (pixelCount < MaxPixelCount)
+          {
+              for (int i = 0; i < SpawnPerInterval; i++)
+              {
+                  await SpawnPixel();
+                  pixelCount++;
+              }
+          }
+          else if (pixelCount > MaxPixelCount)
+          {
+              pixelCount = MaxPixelCount;
+              await TrimPixels();
+          }
+          if (pixelCount > 0)
+          {
+              foreach (var pixel in pixels)
+              {
+                  MovePixel(pixel);
+              }
+              StateHasChanged();
+          }
+      }
+  }
+
+  Task TrimPixels()
+  {
+      //pixels.Skip(MaxPixelCount).ToList().ForEach(p => p.Die());
+      for (int i = pixels.Count -1; i >= MaxPixelCount; i--)
+      {
+          pixels.RemoveAt(i);
+      }
+      return Task.CompletedTask;
+  }
+  double NextHue()
+  {
+      Hue++;
+      Hue = Hue > 250 ? 5 : Hue;
+      return Hue;
+  }
+  Task SpawnPixel()
+  {
+      // Pixel Color/Position/Scale
+      PixelDTO pixel = new PixelDTO()
+      {
+          Colors = new Colors(NextHue(), 90, 70, 1),
+          Position = new Vector2D(EX, EY),
+          Scale = InitialPixelSize,
+          Motion = new Vector2D(random.NextDouble() * 2 - 1.2, 0 - random.NextDouble() * 1)
+      };
+
+      // Add the new pixel to the list, so it gets drawn
+      pixels.Add(pixel);
+      return Task.CompletedTask;
+  }
+
+  void MovePixel(PixelDTO pixel)
+  {
+      // Pixel handles it's own motion
+      if (!pixel.ShouldDie) // again - only because it's a demo
+      {
+          // Initial velocity deltas for the pixel
+          if (pixel.Position.X > 0 && pixel.Position.X < SCREEN_WIDTH && pixel.Position.Y < SCREEN_HEIGHT)
+          {
+              pixel.Position.X += pixel.Motion.X;
+              pixel.Position.Y += pixel.Motion.Y;
+              pixel.Scale *= PixelScaleFactor;
+              pixel.Motion.X *= DeltaXFactor;
+              pixel.Motion.Y += DeltaYFactor;
+              pixel.Colors.A *= PixelAlphaFactor;
+          }
+          else
+          {
+
+              pixel.Colors = new Colors(NextHue(), 90, 70, 1);
+              pixel.Position = new Vector2D(EX, EY);
+              pixel.Scale = InitialPixelSize;
+              pixel.Motion = new Vector2D(random.NextDouble() * 2 - 1.2, 0 - random.NextDouble() * 1);
+          }
+      }
+      else
+      {
+          pixels.Remove(pixel);
+      }
+  }
+  //
+}

@@ -1,0 +1,165 @@
+﻿@using SixLabors.ImageSharp
+@using SixLabors.ImageSharp.Advanced
+@using SixLabors.ImageSharp.PixelFormats
+@using SixLabors.ImageSharp.Processing
+@using System.Drawing
+
+<div class="container-fluid mb-auto">
+    <div class="row">
+        <div class="col-12">
+            <div style="display:grid;grid-template-columns:min-content;width:auto;">
+                <div style="display:grid;grid-template-columns:min-content auto;width:auto;min-width:300px;">
+                    <label style="grid-area: 1/1/1/3;background-color:darkgray;">Image : @PictureWidth x @PictureHeight (@Pixels?.Count Pixels™)</label>
+                    <label style="grid-area: 2/1/2/3;background-color:darkgray;">Pixel Scale</label>
+                    <input style="grid-area: 3/1/3/2;" type="number" max="100" min="1" size="2" bind="@PixelSize" disabled=@(PictureWidth == 0 ? null : "disabled") />
+                    <input style="grid-area: 3/2/3/3;" type="number" max="200" min="1" bind="@MAXDIM" disabled=@(PictureWidth == 0 ? null : "disabled") />
+                </div>
+            </div>
+            <h3>Pixel image @(Pixels?.Count.ToString("0,000 Pixels"))</h3>
+            <input type="file" onchange="var reader = new FileReader(); reader.addEventListener('load', function () { var el = document.querySelector('#filedata'); el.src = this.result; el.dispatchEvent(new Event('change')); }, false); reader.readAsDataURL(this.files[0]);" />
+            <img id="filedata" hidden="hidden" onload=@LoadImage ref=@imgref />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            @if (Pixels is null)
+            {
+                <h4>Upload an image...keep it small (&lt;25KB) for now or it will break</h4>
+                <p>This page uses a small piece of javascript to transfer the file upload to the server.</p>
+                <p>Everything else is either C# or CSS.</p>
+            }
+            else if (IsLoading)
+            {
+                <h4>Image uploading...</h4>
+            }
+            else
+            {
+                <div style="position:relative;">
+                    @foreach (var pixel in Pixels)
+                    {
+                        <KeyframePixel Color=pixel.Colors Position=pixel.Position Size=@PixelSize SpeedRange=@SpeedRange BoundingBox=@BoundingBox />
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@functions {
+  ElementRef imgref;
+  bool IsLoading;
+  bool IsRendering;
+  byte[] FileData;
+  string files
+  {
+      get => ""; set => Loader = LoadImage();
+  }
+  //{
+  //try
+  //{
+  //    if (value.Contains(";base64,") && FileData is null)
+  //    {
+  //        FileData = Convert.FromBase64String(value.Substring(value.IndexOf("base64") + 7));
+  //    }
+  //}
+  //catch { }
+  //  Loader = LoadImage();
+  //}
+  //}
+
+  // The list of active pixels
+  System.Collections.Concurrent.ConcurrentBag<PixelDTO> Pixels;
+
+  double MAXDIM = 100;
+  public int PixelSize = 4;
+  public int PictureWidth = 0;
+  public int PictureHeight = 0;
+  public Vector2D SpeedRange = new Vector2D(200, 1000);
+  public Vector2D BoundingBox => new Vector2D(PictureWidth * PixelSize, PictureHeight * PixelSize);
+
+  Task Loader;
+
+  async Task LoadImage()
+  {
+      Console.WriteLine("LOADIMAGE START");
+      IsLoading = true;
+      await Task.Delay(1);
+      var bytes = FileData;
+      Console.WriteLine("LOADIMAGE LOAD");
+      //var image = await Splat.BitmapLoader.Current.Load(new System.IO.MemoryStream(FileData), null, null);
+      var data = await JSRuntime.Current.InvokeAsync<object[][][]>("pixel.getPixels", imgref, MAXDIM, MAXDIM);
+
+
+
+
+      //Image<Rgba32> imageInitial;
+      //try
+      //{
+      //    // imageInitial = Image.Load(FileData);
+      //}
+      //catch (Exception ex)
+      //{
+      //    Console.WriteLine(ex);
+      //    throw;
+      //}
+      //Console.WriteLine("LOADIMAGE BAG");
+      Pixels = new System.Collections.Concurrent.ConcurrentBag<PixelDTO>();
+      //await Invoke(StateHasChanged);
+      //await Task.Delay(1);
+      //int newSize = (int)MAXDIM;
+      //Image<Rgba32> image;
+
+      //if (imageInitial.Width > newSize || imageInitial.Height > newSize)
+      //{
+      //    var newWidth = imageInitial.Width;
+      //    var newHeight = imageInitial.Height;
+      //    double scale = 1;
+      //    if (newWidth > newHeight)
+      //    {
+      //        scale = (newSize / (double)newWidth);
+      //    }
+      //    else
+      //    {
+      //        scale = (newSize / (double)newHeight);
+      //    }
+      //    Console.WriteLine("LOADIMAGE RESIZE");
+      //    image = imageInitial.Clone(c => c.Resize<Rgba32>((int)(newWidth * scale), (int)(newHeight * scale)));
+      //}
+      //else
+      //{
+      //    image = imageInitial;
+      //}
+
+      PictureHeight = data.Length;
+      PictureWidth = data[0].Length;
+      Console.WriteLine($"Picture is now {PictureWidth} x {PictureHeight} Pixels™");
+      await Invoke(StateHasChanged);
+      await Task.Delay(1);
+
+      ReadPixels(data);
+
+      IsRendering = false;
+      FileData = null;
+      IsLoading = false;
+      await Invoke(StateHasChanged);
+      await Task.Delay(1);
+  }
+
+  void ReadPixels(object[][][] image)
+  {
+      Parallel.For(0, image.Length, y =>
+      {
+          Parallel.For(0, image[y].Length, x =>
+          {
+              var Color = image[y][x];
+
+              var pixel = new PixelDTO()
+              {
+                  Colors = new Colors(double.Parse(Color[0].ToString()), double.Parse(Color[1].ToString()), double.Parse(Color[2].ToString()), double.Parse(Color[3].ToString())),
+                  Position = new Vector2D(x * PixelSize, y * PixelSize),
+                  Scale = PixelSize
+              };
+              Pixels.Add(pixel);
+          });
+      });
+  }
+}

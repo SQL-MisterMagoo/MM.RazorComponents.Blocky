@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace MM.RazorComponents.Blocky.Server
 {
@@ -27,7 +26,43 @@ namespace MM.RazorComponents.Blocky.Server
 			}
 
 			app.UseStaticFiles();
+			
+			app.UseSignalR(route => route.MapHub<BlazorHub>(BlazorHub.DefaultPath, o =>
+			{
+				o.ApplicationMaxBufferSize = 0 ; // larger size
+				o.TransportMaxBufferSize = 0 ; // larger size
+			}));
 			app.UseRazorComponents<App.Startup>();
+			Console.WriteLine("Launch");
+			//OpenUrl("http://localhost:59515/");
+		}
+		private void OpenUrl(string url)
+		{
+			try
+			{
+				Process.Start(url);
+			}
+			catch
+			{
+				// hack because of this: https://github.com/dotnet/corefx/issues/10361
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				{
+					url = url.Replace("&", "^&");
+					Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+				{
+					Process.Start("xdg-open", url);
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+				{
+					Process.Start("open", url);
+				}
+				else
+				{
+					throw;
+				}
+			}
 		}
 	}
 }

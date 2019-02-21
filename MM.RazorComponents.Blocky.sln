@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28531.58
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MM.RazorComponents.Blocky.Server", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\MM.RazorComponents.Blocky.Server.csproj", "{3DD8BCAF-DF41-43ED-ADF0-CF866E0EB7EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MM.RazorComponents.Blocky.Server", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Server\MM.RazorComponents.Blocky.Server.csproj", "{3DD8BCAF-DF41-43ED-ADF0-CF866E0EB7EB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MM.RazorComponents.Blocky.App", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.App\MM.RazorComponents.Blocky.App.csproj", "{29DCCE18-EE5E-4F7A-B6DB-A4790F189633}"
 EndProject
@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MM.Blazor.Blocky.App", "MM.Blazor.Blocky.App\MM.Blazor.Blocky.App.csproj", "{21B338D3-DC46-43B3-89EA-304C82C0CE85}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MM.RazorComponents.Blocky.Shared", "MM.RazorComponents.Blocky\MM.RazorComponents.Blocky.Shared\MM.RazorComponents.Blocky.Shared.csproj", "{A97C72B5-36FE-47ED-9A36-D25C65E30842}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +30,14 @@ Global
 		{29DCCE18-EE5E-4F7A-B6DB-A4790F189633}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29DCCE18-EE5E-4F7A-B6DB-A4790F189633}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29DCCE18-EE5E-4F7A-B6DB-A4790F189633}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21B338D3-DC46-43B3-89EA-304C82C0CE85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21B338D3-DC46-43B3-89EA-304C82C0CE85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21B338D3-DC46-43B3-89EA-304C82C0CE85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21B338D3-DC46-43B3-89EA-304C82C0CE85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A97C72B5-36FE-47ED-9A36-D25C65E30842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A97C72B5-36FE-47ED-9A36-D25C65E30842}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A97C72B5-36FE-47ED-9A36-D25C65E30842}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A97C72B5-36FE-47ED-9A36-D25C65E30842}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

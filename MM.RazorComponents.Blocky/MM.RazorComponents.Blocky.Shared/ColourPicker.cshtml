@@ -1,0 +1,99 @@
+﻿<div style="display: flex;flex-direction: row;align-items: center;justify-content: center;">
+    <PixelContainer Items=@Pixels PixelSize=@PixelSize ChangeSaturation=@ModifySaturation Render=@PCRender />
+    <div style="display:grid;grid-template-columns:min-content;width:auto;">
+        <div style="display:grid;grid-template-columns:min-content auto;width:auto;">
+            <label style="grid-area: 1/1/1/3;background-color:darkgray;">Granularity</label>
+            <input style="grid-area: 2/1/2/2;" type="text" max="30" min="1" size="2" bind="@Grain" />
+            <input style="grid-area: 2/2/2/3;" type="range" max="30" min="1" bind="@Grain" />
+        </div>
+        <div style="display:grid;grid-template-columns:min-content auto;width:auto;">
+            <label style="grid-area: 1/1/1/3;background-color:darkgray;">Saturation</label>
+            <input style="grid-area: 2/1/2/2;" type="text" max="100" min="0" size="2" bind="@Saturation" />
+            <input style="grid-area: 2/2/2/3;" type="range" max="100" min="0" bind="@Saturation" />
+        </div>
+        <div style="display:grid;grid-template-columns:min-content auto;width:auto;">
+            <label style="grid-area: 1/1/1/3;background-color:darkgray;">Pixel Size</label>
+            <input style="grid-area: 2/1/2/2;" type="text" max="100" min="1" size="2" bind="@PixelSize" />
+            <input style="grid-area: 2/2/2/3;" type="range" max="100" min="1" bind="@PixelSize" />
+        </div>
+    </div>
+</div>
+
+@functions
+{
+    List<string> Pixels
+        = new List<string>();
+
+    int pixelsize = 10;
+    int PixelSize { get => pixelsize; set { oldwidth = value * grain; pixelsize = value; } }
+    int grain = 15;
+    int oldwidth = 150;
+    int Grain { get => grain; set { grain = value; InvokeAsync(Refresh); } }
+    int luminance = 50;
+    int saturation = 50;
+    int Saturation { get => saturation; set { saturation = value; Refresh(); } }
+    bool PCRender = true;
+    protected override async Task OnInitAsync()
+    {
+        await base.OnInitAsync();
+
+        await Refresh();
+    }
+    async Task Refresh()
+    {
+        await Task.Factory.StartNew(() =>
+        {
+            Pixels = Enumerable.Range(0, grain + 1)
+              .SelectMany(x =>
+              {
+                  double h = 360.0 * (double)x / (double)grain;
+                  return Enumerable.Range(0, grain + 1)
+                    .Select(y => hslToHex(h, saturation, 100.0 * (double)y / (double)grain));
+              }
+              ).ToList();
+        });
+        pixelsize = oldwidth / grain;
+        StateHasChanged();
+    }
+    Task ModifySaturation(UIWheelEventArgs args)
+    {
+        int sat = Math.Min(Math.Max(saturation + (args.DeltaY < 0 ? 5 : -5), 0), 100);
+        Saturation = sat;
+        return Task.CompletedTask;
+    }
+    string hslToHex(double H, double S, double L)
+    {
+        var h = H / 360;
+        var s = S / 100;
+        var l = L / 100;
+        double r, g, b;
+        if (s == 0)
+        {
+            r = g = b = l; // achromatic
+        }
+        else
+        {
+            double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            double p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+        }
+        return $"{toHex(r)}{toHex(g)}{toHex(b)}";
+
+        double hue2rgb(double P, double Q, double T)
+        {
+            if (T < 0) T += 1;
+            if (T > 1) T -= 1;
+            if (T < 1 / 6) return P + (Q - P) * 6 * T;
+            if (T < 1 / 2) return Q;
+            if (T < 2 / 3) return P + (Q - P) * (2 / 3 - T) * 6;
+            return P;
+        };
+        string toHex(double x)
+        {
+            return Math.Round(x * 255).ToString("#X2");
+        };
+    }
+}
+

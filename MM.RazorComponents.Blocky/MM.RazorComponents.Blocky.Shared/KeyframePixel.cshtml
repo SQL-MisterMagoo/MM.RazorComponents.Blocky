@@ -1,0 +1,24 @@
+﻿<p class=@classes style=@style />
+@functions
+{
+  [Parameter] protected Colors Color { get; set; }
+  [Parameter] protected Vector2D Position { get; set; }
+  [Parameter] protected int Size { get; set; }
+  [Parameter] protected string ClassName { get; set; } = "pixel";
+  [Parameter] protected string SubClassName { get; set; } = "px-abs px-g px-r px-nm";
+  [Parameter] protected Vector2D BoundingBox { get; set; } = new Vector2D(500, 300);
+  [Parameter] protected Vector2D SpeedRange { get; set; } = new Vector2D(2000, 5000);
+
+  Random random = new Random();
+  int StartLeft => random.Next(0, (int)BoundingBox.X);
+  int StartTop => random.Next(0, (int)BoundingBox.Y);
+  int Speed => random.Next((int)SpeedRange.X, (int)SpeedRange.Y);
+
+  string FinalPositionStyle => $"--pxtt:{Position.Y.ToString("F0")}px;--pxtl:{Position.X.ToString("F0")}px;";
+  string StartPositionStyle => $"--psl:{StartLeft}px;--pst:{StartTop}px;";
+  string SpeedStyle => $"--pxgs:{Speed}ms;";
+  string SizingStyle => Size > 0 ? $"--pw:{Size}px;--ph:{Size}px;" : "--pw:var(--ppw);--ph:var(--pph);";
+  string ColorStyle => $"--pc:rgba({Color.C1.ToString("F2")},{Color.C2.ToString("F2")},{Color.C3.ToString("F2")},{Color.A.ToString("F2")});";
+  string style => $"{FinalPositionStyle}{StartPositionStyle}{SizingStyle}{ColorStyle}{SpeedStyle}";
+  string classes => $"{ClassName} {SubClassName}";
+}  

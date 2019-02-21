@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MM.RazorComponents.Blocky.App
+namespace MM.Blazor.Blocky.App
 {
 	public class Startup
 	{

@@ -2,11 +2,6 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    pointer-events:none;
-}
-
-input,a {
-    pointer-events: auto;
 }
 
 app {

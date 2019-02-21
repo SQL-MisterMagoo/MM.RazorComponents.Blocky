@@ -1,0 +1,23 @@
+﻿@if (Clickable)
+{
+    <p onmousedown=@Select class="@ClassName @SubClassName" style="@ColorStyle" />
+}
+else
+{
+    <p class="@ClassName @SubClassName" style="@ColorStyle" />
+}
+@functions
+{
+    [Parameter] protected string Color { get; set; }
+    [Parameter] protected Func<string, Task> Selected { get; set; }
+    [Parameter] protected bool Clickable { get; set; }
+    [Parameter] protected string ClassName { get; set; } = "pixel";
+    [Parameter] protected string SubClassName { get; set; } = "px-grid";
+
+    string ColorStyle => $"--pc:{Color};";
+
+    async Task Select(UIMouseEventArgs args)
+    {
+        await Selected?.Invoke(Color);
+    }
+}
