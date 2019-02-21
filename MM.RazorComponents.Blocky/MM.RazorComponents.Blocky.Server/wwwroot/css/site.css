@@ -5,7 +5,7 @@ html, body {
     pointer-events:none;
 }
 
-input,a {
+input, a, #pixelcascade {
     pointer-events: auto;
 }
 
