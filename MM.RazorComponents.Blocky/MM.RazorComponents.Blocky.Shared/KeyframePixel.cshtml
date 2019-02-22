@@ -3,22 +3,38 @@
 {
   [Parameter] protected Colors Color { get; set; }
   [Parameter] protected Vector2D Position { get; set; }
+  [Parameter] protected Vector2D? ArcPosition { get; set; }
+  [Parameter] protected Vector2D? StartPosition { get; set; }
   [Parameter] protected int Size { get; set; }
   [Parameter] protected string ClassName { get; set; } = "pixel";
   [Parameter] protected string SubClassName { get; set; } = "px-abs px-g px-r px-nm";
   [Parameter] protected Vector2D BoundingBox { get; set; } = new Vector2D(500, 300);
   [Parameter] protected Vector2D SpeedRange { get; set; } = new Vector2D(2000, 5000);
+  [Parameter] protected Vector2D? ScaleRange { get; set; }
+  [Parameter] protected Vector2D? OpacityRange { get; set; }
 
   Random random = new Random();
-  int StartLeft => random.Next(0, (int)BoundingBox.X);
-  int StartTop => random.Next(0, (int)BoundingBox.Y);
+  int StartLeft => (int)(StartPosition?.X ?? random.Next(0, (int)BoundingBox.X));
+  int StartTop => (int)(StartPosition?.Y ?? random.Next(0, (int)BoundingBox.Y));
+  int ArcLeft => (int)(ArcPosition?.X);
+  int ArcTop => (int)(ArcPosition?.Y);
+  int StartScale => (int)(ScaleRange?.X);
+  int EndScale => (int)(ScaleRange?.Y);
+  double StartOpacity => OpacityRange?.X ?? 1.00;
+  double EndOpacity => OpacityRange?.Y ?? 1.00;
+
   int Speed => random.Next((int)SpeedRange.X, (int)SpeedRange.Y);
 
+  string ColorTypeName => Enum.GetName(typeof(ColorType), Color.ColorType).ToLower();
+  string ColorTypePercent => Color.ColorType == ColorType.HSLA ? "%" : "";
   string FinalPositionStyle => $"--pxtt:{Position.Y.ToString("F0")}px;--pxtl:{Position.X.ToString("F0")}px;";
   string StartPositionStyle => $"--psl:{StartLeft}px;--pst:{StartTop}px;";
-  string SpeedStyle => $"--pxgs:{Speed}ms;";
+  string ArcPositionStyle => ArcPosition is null ? "" : $"--psal:{ArcLeft}px;--psat:{ArcTop}px;";
+  string SpeedStyle => StartPosition is null ? $"--pxgs:{Speed}ms;" : $"--pxfs:{Speed}ms;";
   string SizingStyle => Size > 0 ? $"--pw:{Size}px;--ph:{Size}px;" : "--pw:var(--ppw);--ph:var(--pph);";
-  string ColorStyle => $"--pc:rgba({Color.C1.ToString("F2")},{Color.C2.ToString("F2")},{Color.C3.ToString("F2")},{Color.A.ToString("F2")});";
-  string style => $"{FinalPositionStyle}{StartPositionStyle}{SizingStyle}{ColorStyle}{SpeedStyle}";
+  string ScalingStyle => ScaleRange is null ? "" : $"--pxss:{StartScale};--pxts:{EndScale};";
+  string ColorStyle => $"--pc:{ColorTypeName}({Color.C1.ToString("F2")},{Color.C2.ToString("F2")}{ColorTypePercent},{Color.C3.ToString("F2")}{ColorTypePercent},{Color.A.ToString("F2")});";
+  string OpacityStyle => OpacityRange is null ? "" : $"--pxso:{StartOpacity};--pxto:{EndOpacity};";
+  string style => $"{StartPositionStyle}{ArcPositionStyle}{FinalPositionStyle}{SizingStyle}{ScalingStyle}{ColorStyle}{OpacityStyle}{SpeedStyle}";
   string classes => $"{ClassName} {SubClassName}";
 }  

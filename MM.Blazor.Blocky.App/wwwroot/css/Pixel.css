@@ -1,16 +1,16 @@
 ﻿.pixel {
-    --pw: 1px;
-    --ph: 1px;
-    --pc: black;
-    --pixel-gather-animation: "";
-    --pixel-reveal-animation: "";
-    --pixel-gather-delay: 0.7s;
-    --pxgs: 1000ms;
-    --pixel-reveal-delay: 0.7s;
-    --psl: 0px;
-    --pst: 0px;
-    --pxtl: 0px;
-    --pxtt: 0px;
+    --pw: 1px; /* Width */
+    --ph: 1px; /* Height */
+    --pc: black; /* Colour */
+    --pixel-gather-animation: ""; /* Animation for gathering pixels */
+    --pixel-reveal-animation: ""; /* Animation for revealing pixels */
+    --pixel-gather-delay: 0.7s; /* Delay before starting gather animation */
+    --pxgs: 1000ms; /* Duration of gather animation */
+    --pixel-reveal-delay: 0.7s; /* Delay before starting reveal animation */
+    --psl: 0px; /* Starting Position - Left */
+    --pst: 0px; /* Starting Position - Top */
+    --pxtl: 0px; /* Target End Position - Left */
+    --pxtt: 0px; /* Target End Position - Top */
     margin: 0;
     padding: 0;
     border-collapse: collapse;
@@ -21,6 +21,27 @@
     animation: var(--pixel-gather-animation), var(--pixel-reveal-animation);
     will-change: transform;
 }
+
+    .pixel.px-fall {
+        position: absolute;
+        --psl: 40vw;
+        --pst: 5vh;
+        --psal: 48%; /* Position at top of arc - Left */
+        --psat: 0%; /* Position at top of arc - Top */
+        --pxtl: 35vw;
+        --pxtt: 101vh;
+        --pxfs: 1200ms; /* Duration of Falling animation */
+        --pxss: 1; /* Initial scale of falling pixel */
+        --pxts: 4; /* Target scale of falling pixel */
+        --pxso: 1; /* Initial opacity of falling pixel */
+        --pxto: 0.9; /* Target opacity of falling pixel */
+        animation: falling var(--pxfs) ease-in infinite;
+        top: 0px;
+        left: 0px;
+        border-radius: 50%;
+        opacity: var(--pxso);
+        transform: translate(var(--psl), var(--pst)) scale(1);
+    }
 
     .pixel.px-nm {
         pointer-events: none;
@@ -62,5 +83,20 @@
 
     100% {
         opacity: 1;
+    }
+}
+
+@keyframes falling {
+    24% {
+        transform: translate(var(--psal),var(--psat));
+    }
+
+    25% {
+        transform: translate(var(--psal),var(--psat));
+    }
+
+    100% {
+        opacity: var(--pxto);
+        transform: translate(var(--pxtl),var(--pxtt)) scale(var(--pxts));
     }
 }
