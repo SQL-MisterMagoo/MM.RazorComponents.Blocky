@@ -11,9 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="MM.RazorComponents.Blocky.Shared">
-      <HintPath>..\MM.RazorComponents.Blocky.Shared\bin\Release\netstandard2.0\MM.RazorComponents.Blocky.Shared.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\MM.RazorComponents.Blocky.Shared\MM.RazorComponents.Blocky.Shared.csproj" />
   </ItemGroup>
 
 </Project>
